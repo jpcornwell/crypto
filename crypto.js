@@ -47,11 +47,16 @@ function asciiDecode(ascii) {
     return bytes;
 }
 
-// need to replace btoa/atob with buffer.toString or use my own encoding logic
 function base64Decode(base64) {
-    return atob(base64);
+    var ascii = new Buffer(base64, 'base64').toString('ascii');
+    var bytes = asciiDecode(ascii);
+
+    return bytes;
 }
 
 function base64Encode(bytes) {
-    return btoa(bytes);
+    var ascii = asciiEncode(bytes);
+    var base64 = new Buffer(ascii).toString('base64');
+
+    return base64;
 }
