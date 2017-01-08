@@ -1,4 +1,18 @@
 
+function fixedXor(a, b) {
+    if (a.length !== b.length) {
+        throw 'inputs are not equal length';
+    }
+
+    var output = new Uint8Array(a.length);
+
+    for (var i = 0; i < a.length; i++) {
+        output[i] = a[i] ^ b[i];
+    }
+
+    return output;
+}
+
 function hexDecode(hex) {
     if (hex.length % 2 === 1) {
         throw 'hex string is not even length';
