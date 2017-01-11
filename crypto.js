@@ -55,8 +55,9 @@ function scoreEnglishText(text) {
     // count characters
     for (var i = 0; i < text.length; i++) {
         var char = text[i];
+        var charCode = char.charCodeAt();
         // if char is a-z or space character
-        if ((char >= 97 && char <= 122) || char === 32) {
+        if ((charCode >= 97 && charCode <= 122) || charCode === 32) {
             counts[char] += 1;
         }
     }
@@ -65,7 +66,7 @@ function scoreEnglishText(text) {
     var score = 0;
     Object.keys(englishFreq).forEach(function (char) {
         var expected = englishFreq[char] * text.length;
-        score += ((counts[char] - expected)^2 / expected);
+        score += (Math.pow(counts[char] - expected, 2) / expected);
     });
 
     return score;
