@@ -8,13 +8,38 @@ var englishFreq = {
     'z': 0.00074, ' ': 0.12702
 };
 
-var a = 'hello how are you today';
-var b = 'kdaf;lkdsdjaf kjdslaeio';
-var c = 'as of javascript you can use object keys';
 
-console.log(scoreEnglishText(a));
-console.log(scoreEnglishText(b));
-console.log(scoreEnglishText(c));
+function crackSingleByteXor(input, num) {
+    var candidates = [];
+
+    for (i = 0; i <= 255; i++) {
+        var currentCandidate = applySingleByteXor(input, i);
+        currentCandidate = asciiEncode(currentCandidate);
+        var currentScore = scoreEnglishText(currentCandidate);
+        candidates.push({text: currentCandidate, score: currentScore});
+    }
+
+    candidates.sort(function (a, b) {
+        if (a.score < b.score) return -1;
+        if (a.score > b.score) return 1;
+        return 0;
+    });
+
+    candidates.splice(num + 1);
+
+    return candidates;
+}
+
+function applySingleByteXor(input, byte) {
+    var bytes = new Uint8Array(input.length); 
+
+    for (var i = 0; i < bytes.length; i++) {
+        bytes[i] = byte;
+    }
+
+    return fixedXor(input, bytes);
+}
+
 
 function scoreEnglishText(text) {
     text = text.toLowerCase();
