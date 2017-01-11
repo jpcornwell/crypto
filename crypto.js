@@ -16,7 +16,7 @@ function crackSingleByteXor(input, num) {
         var currentCandidate = applySingleByteXor(input, i);
         currentCandidate = asciiEncode(currentCandidate);
         var currentScore = scoreEnglishText(currentCandidate);
-        candidates.push({text: currentCandidate, score: currentScore});
+        candidates.push({text: currentCandidate, score: currentScore, key: i});
     }
 
     candidates.sort(function (a, b) {
