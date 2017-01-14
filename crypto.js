@@ -13,7 +13,7 @@ function crackSingleByteXor(input, num) {
 
     var candidates = [];
 
-    for (i = 0; i <= 255; i++) {
+    for (var i = 0; i <= 255; i++) {
         var currentCandidate = applySingleByteXor(input, i);
         currentCandidate = asciiEncode(currentCandidate);
         var currentScore = scoreEnglishText(currentCandidate);
