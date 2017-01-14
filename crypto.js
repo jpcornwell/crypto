@@ -14,7 +14,7 @@ function crackSingleByteXor(input, num) {
     var candidates = [];
 
     for (var i = 0; i <= 255; i++) {
-        var currentCandidate = applySingleByteXor(input, i);
+        var currentCandidate = applyRepeatingKeyXor(input, [i]);
         currentCandidate = asciiEncode(currentCandidate);
         var currentScore = scoreEnglishText(currentCandidate);
         candidates.push({text: currentCandidate, score: currentScore, key: i});
@@ -31,16 +31,17 @@ function crackSingleByteXor(input, num) {
     return candidates;
 }
 
-function applySingleByteXor(input, byte) {
+function applyRepeatingKeyXor(input, key) {
     var bytes = new Uint8Array(input.length); 
 
-    for (var i = 0; i < bytes.length; i++) {
-        bytes[i] = byte;
+    for (var i = 0, j = 0; i < bytes.length; i++) {
+        if (j >= key.length) j = 0;
+        bytes[i] = key[j];
+        j++;
     }
 
     return fixedXor(input, bytes);
 }
-
 
 function scoreEnglishText(text) {
     text = text.toLowerCase();
