@@ -8,8 +8,9 @@ var englishFreq = {
     'z': 0.00074, ' ': 0.12702
 };
 
-
 function crackSingleByteXor(input, num) {
+    num = num || 1;
+
     var candidates = [];
 
     for (i = 0; i <= 255; i++) {
@@ -25,7 +26,7 @@ function crackSingleByteXor(input, num) {
         return 0;
     });
 
-    candidates.splice(num + 1);
+    candidates.splice(num);
 
     return candidates;
 }
@@ -59,12 +60,17 @@ function scoreEnglishText(text) {
         // if char is a-z or space character
         if ((charCode >= 97 && charCode <= 122) || charCode === 32) {
             counts[char] += 1;
+        } else if (counts[char] === undefined) {
+            counts[char] = 1;
+            englishFreq[char] = 0.001;
+        } else {
+            counts[char] += 1;
         }
     }
 
     // calculate score
     var score = 0;
-    Object.keys(englishFreq).forEach(function (char) {
+    Object.keys(counts).forEach(function (char) {
         var expected = englishFreq[char] * text.length;
         score += (Math.pow(counts[char] - expected, 2) / expected);
     });
