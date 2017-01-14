@@ -79,6 +79,15 @@ function scoreEnglishText(text) {
     return score;
 }
 
+function hammingDistance(a, b) {
+    xor = fixedXor(a, b);
+    var count = 0;
+    for (var i = 0; i < xor.length; i++) {
+        count += xor[i].toString(2).split('1').length - 1;
+    }
+    return count;
+}
+
 function fixedXor(a, b) {
     if (a.length !== b.length) {
         throw 'inputs are not equal length';
