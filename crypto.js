@@ -8,6 +8,84 @@ var englishFreq = {
     'z': 0.00074, ' ': 0.12702
 };
 
+function crackRepeatingKeyXor(input) {
+    var keySize = guessKeySize(input);
+    var key = guessKey(input, keySize);
+    var text = asciiEncode(applyRepeatingKeyXor(input, key));
+    return {text: text, key: key};
+
+    function guessKeySize(input) {
+        var low = 2;
+        var hi = 40;
+
+        var bestScore = 9999; // lower is better
+        var bestSize = 0;
+        for (var currentSize = low; currentSize <= hi; currentSize++) {
+            var currentScore = scoreKeySize(input, currentSize);
+            if (currentScore < bestScore) {
+                bestScore = currentScore;
+                bestSize = currentSize;
+            }
+        }
+
+        return bestSize;
+    }
+
+    function scoreKeySize(input, keySize) {
+        
+        // split input into blocks of length keySize
+        var blocks = [];
+        var currentBlock = [];
+        for (var i = 0, j = 0; i < input.length; i++) {
+            currentBlock.push(input[i]);
+            j++;
+            if (j >= keySize) {
+                blocks.push(currentBlock);
+                currentBlock = [];
+                j = 0;
+            }
+        }
+       
+        
+        // compute list of normalized Hamming distances
+        // compare block 1 with 2, 3 with 4, etc.
+        var distances = [];
+        for (var i = 0; i < blocks.length - 1; i += 2) {
+            var hammingDistance = findHammingDistance(blocks[i], blocks[i+1]);
+            var normalizedDistance = hammingDistance / keySize;
+            distances.push(normalizedDistance);
+        }
+
+        // find the average of the distances
+        var sum = 0;
+        for (var i = 0; i < distances.length; i++) {
+            sum += distances[i];
+        }
+        var averageDist = sum / distances.length;
+
+        return averageDist;
+    }
+
+    function guessKey(input, keySize) {
+        var blocks = [];
+        for (var i = 0; i < keySize; i++) {
+            blocks.push([]);
+        }
+
+        for (var i = 0; i < input.length; i++) {
+            blocks[i%keySize].push(input[i]);
+        }
+
+        key = [];
+        for (var i = 0; i < blocks.length; i++) {
+            var keyByte = crackSingleByteXor(blocks[i])[0].key;
+            key.push(keyByte);
+        }
+
+        return key;
+    }
+}
+
 function crackSingleByteXor(input, num) {
     num = num || 1;
 
@@ -79,7 +157,7 @@ function scoreEnglishText(text) {
     return score;
 }
 
-function hammingDistance(a, b) {
+function findHammingDistance(a, b) {
     xor = fixedXor(a, b);
     var count = 0;
     for (var i = 0; i < xor.length; i++) {

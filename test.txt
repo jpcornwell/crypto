@@ -1,0 +1,10 @@
+Hello, this is some sample text to test out the code
+for cracking repeating key xor. This has to have english
+text instead of lorem ipsum because lorem ipsum could mess
+up the frequency analysis that my code does. I have no idea
+how long this needs to be for it to be accurate. So I will
+keep typing some more text in here. Then I am going to apply
+repeating key xor to it, and then try to crack it and see if
+the key size and key contents are properly guessed. Okay this
+is probably enough now. Also, I could use this for things
+other than repeating key xor.
