@@ -1,3 +1,4 @@
+var fs = require('fs');
 
 var englishFreq = {
     'a': 0.08167, 'b': 0.01492, 'c': 0.02782, 'd': 0.04253, 'e': 0.12702, 
@@ -229,15 +230,15 @@ function asciiDecode(ascii) {
 }
 
 function base64Decode(base64) {
-    var ascii = new Buffer(base64, 'base64').toString('ascii');
-    var bytes = asciiDecode(ascii);
+    var hex = new Buffer(base64, 'base64').toString('hex');
+    var bytes = hexDecode(hex);
 
     return bytes;
 }
 
 function base64Encode(bytes) {
-    var ascii = asciiEncode(bytes);
-    var base64 = new Buffer(ascii).toString('base64');
+    var hex = hexEncode(bytes);
+    var base64 = new Buffer(hex, 'hex').toString('base64');
 
     return base64;
 }
