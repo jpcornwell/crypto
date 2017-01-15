@@ -1,4 +1,5 @@
 var fs = require('fs');
+var crypto = require('crypto');
 
 var englishFreq = {
     'a': 0.08167, 'b': 0.01492, 'c': 0.02782, 'd': 0.04253, 'e': 0.12702, 
@@ -8,6 +9,26 @@ var englishFreq = {
     'u': 0.02758, 'v': 0.00978, 'w': 0.02360, 'x': 0.00150, 'y': 0.01974, 
     'z': 0.00074, ' ': 0.12702
 };
+
+function encryptAes128Ecb(input, key) {
+    input = hexEncode(input);
+    key = asciiEncode(key);
+    var cipher = crypto.createCipheriv('aes-128-ecb', key, '');
+    var crypted = cipher.update(input, 'hex', 'hex');
+    crypted += cipher.final('hex');
+    crypted = hexDecode(crypted);
+    return crypted;
+}
+
+function decryptAes128Ecb(input, key) {
+    input = hexEncode(input);
+    key = asciiEncode(key);
+    var decipher = crypto.createDecipheriv('aes-128-ecb', key, '');
+    var dec = decipher.update(input, 'hex', 'hex');
+    dec += decipher.final('hex');
+    dec = hexDecode(dec);
+    return dec;
+}
 
 function crackRepeatingKeyXor(input) {
     var keySize = guessKeySize(input);
