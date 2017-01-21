@@ -20,10 +20,70 @@ function addPkcsPadding(input, blockSize) {
     return output;
 }
 
+function splitBytesIntoBlocks(input, blockSize) {
+    if (input.length % blockSize !== 0) {
+        throw new "Number of bytes of input is not a multiple of block size";
+    }
+
+    var outputBlocks = [];
+    for (var i = 0; i < input.length; i += blockSize) {
+        outputBlocks.push(new Uint8Array(input.slice(i, i + blockSize)));
+    }
+    return outputBlocks;
+}
+
+function mergeBlocksIntoBytes(input, blockSize) {
+    if (input[input.length - 1].length !== blockSize) {
+        throw new "Number of bytes of input is not a multiple of block size";
+    }
+
+    var output = new Uint8Array(input.length * blockSize);
+    for (var i = 0; i < input.length; i++) {
+        for (var j = 0; j < blockSize; j++) {
+            output[i * blockSize + j] = input[i][j];
+        }
+    }
+
+    return output;
+}
+
+function encryptAes128Cbc(input, key, iv) {
+    var blockSize = 16;
+    input = addPkcsPadding(input, blockSize);
+    var blocks = splitBytesIntoBlocks(input, blockSize);
+    for (var i = 0; i < blocks.length; i++) {
+        if (i === 0) {
+            blocks[i] = fixedXor(blocks[i], iv);
+        } else {
+            blocks[i] = fixedXor(blocks[i], blocks[i - 1]);
+        }
+        blocks[i] = encryptAes128Ecb(blocks[i], key);
+    }
+
+    return mergeBlocksIntoBytes(blocks, blockSize);
+}
+
+function decryptAes128Cbc(input, key, iv) {
+    var blockSize = 16;
+    var blocks = splitBytesIntoBlocks(input, blockSize);
+
+    for (var i = blocks.length - 1; i >= 0; i--) {
+        blocks[i] = decryptAes128Ecb(blocks[i], key);
+        if (i === 0) {
+            blocks[i] = fixedXor(blocks[i], iv);
+        } else {
+            blocks[i] = fixedXor(blocks[i], blocks[i - 1]);
+        }
+    }
+
+    return mergeBlocksIntoBytes(blocks, blockSize);
+}
+
 function encryptAes128Ecb(input, key) {
     input = hexEncode(input);
     key = asciiEncode(key);
     var cipher = crypto.createCipheriv('aes-128-ecb', key, '');
+    cipher.setAutoPadding(false);
     var crypted = cipher.update(input, 'hex', 'hex');
     crypted += cipher.final('hex');
     crypted = hexDecode(crypted);
@@ -34,6 +94,7 @@ function decryptAes128Ecb(input, key) {
     input = hexEncode(input);
     key = asciiEncode(key);
     var decipher = crypto.createDecipheriv('aes-128-ecb', key, '');
+    decipher.setAutoPadding(false);
     var dec = decipher.update(input, 'hex', 'hex');
     dec += decipher.final('hex');
     dec = hexDecode(dec);
