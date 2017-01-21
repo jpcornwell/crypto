@@ -1,6 +1,25 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
+function addPkcsPadding(input, blockSize) {
+    var bytesExtra = input.length % blockSize;
+
+    if (bytesExtra === 0) {
+        return input;
+    }
+
+    var bytesNeeded = blockSize - bytesExtra;
+    var output = new Uint8Array(input.length + bytesNeeded);
+    for (var i = 0; i < input.length; i++) {
+        output[i] = input[i];
+    }
+    for (var i = 0; i < bytesNeeded; i++) {
+        output[i + input.length] = bytesNeeded;
+    }
+
+    return output;
+}
+
 function encryptAes128Ecb(input, key) {
     input = hexEncode(input);
     key = asciiEncode(key);
