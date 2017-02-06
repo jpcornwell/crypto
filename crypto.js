@@ -1,6 +1,21 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
+function randomInteger(low, high) {
+    return Math.floor(Math.random() * (high - low + 1) + low);
+}
+
+function generateRandomKey(keySize) {
+    var key = new Uint8Array(keySize);
+
+    for (var i = 0; i < keySize; i++) {
+        key[i] = randomInteger(0, 255);
+    }
+
+    return key;
+}
+
+
 function addPkcsPadding(input, blockSize) {
     var bytesExtra = input.length % blockSize;
 
