@@ -1,18 +1,37 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
+function createBlackBox() {
+    var key;
+    var iv;
+    var availableBlockModes = ['ecb', 'cbc'];
+    var blockMode;
+
+    key = generateRandomBytes(16);
+    iv = generateRandomBytes(16);
+    blockMode = availableBlockModes[randomInteger(0, 1)];
+
+    return function (input) {
+        if (blockMode === 'ecb') {
+            return encryptAes128Ecb(input, key);
+        } else if (blockMode === 'cbc') {
+            return encryptAes128Cbc(input, key, iv);
+        }
+    };
+}
+
 function randomInteger(low, high) {
     return Math.floor(Math.random() * (high - low + 1) + low);
 }
 
-function generateRandomKey(keySize) {
-    var key = new Uint8Array(keySize);
+function generateRandomBytes(size) {
+    var bytes = new Uint8Array(size);
 
-    for (var i = 0; i < keySize; i++) {
-        key[i] = randomInteger(0, 255);
+    for (var i = 0; i < size; i++) {
+        bytes[i] = randomInteger(0, 255);
     }
 
-    return key;
+    return bytes;
 }
 
 
