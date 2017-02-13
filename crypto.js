@@ -1,6 +1,50 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
+function decryptEcbByteAtATime(blackBox) {
+    var blockSize;
+
+    blockSize = findBlockSize(blackBox);
+    isEcb = checkIfEcb(blackBox);
+    if (!checkIfEcb(blackBox)) {
+        console.log('The given black box is not in ecb mode!');
+    }
+
+    function findBlockSize(blackBox) {
+        var firstLength;
+        var secondLength;
+        var input;
+        var output;
+
+        input = asciiDecode('a');
+        output = blackBox(input);
+        firstLength = output.length;
+        secondLength = output.length;
+        while (firstLength === secondLength) {
+            input = asciiDecode(asciiEncode(input) + 'a');
+            output = blackBox(input);
+            secondLength = output.length;
+        }
+        
+        return secondLength - firstLength;
+    }
+
+    function checkIfEcb(blackBox) {
+        var input = new Uint8Array(blockSize * 2);
+        for (var i = 0; i < input.length; i ++) {
+            input[i] = 255;
+        }
+        var output = blackBox(input);
+
+        for (var i = 0; i < blockSize; i++) {
+            if (output[i] !== output[i + blockSize]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
 
 function createEcbBlackBox() {
     // this black box contains a target string which is appended to user input
