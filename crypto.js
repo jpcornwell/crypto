@@ -2,6 +2,27 @@ var fs = require('fs');
 var crypto = require('crypto');
 
 
+function createEcbBlackBox() {
+    // this black box contains a target string which is appended to user input
+
+    var key;
+
+    key = generateRandomBytes(16);
+
+    return function (input) {
+        var target = '' +
+            'Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkg' +
+            'aGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBq' +
+            'dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg' +
+            'YnkK';
+        target = base64Decode(target);
+
+        input = concatenateBytes(input, target);
+
+        return encryptAes128Ecb(input, key);
+    };
+}
+
 function concatenateBytes(first, second) {
     var bytes = new Uint8Array(first.length + second.length);
     var bytesIndex = 0;
