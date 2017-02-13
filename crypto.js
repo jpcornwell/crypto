@@ -1,17 +1,43 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
+
+function concatenateBytes(first, second) {
+    var bytes = new Uint8Array(first.length + second.length);
+    var bytesIndex = 0;
+
+    for (var i = 0; i < first.length; i++) {
+        bytes[bytesIndex] = first[i];
+        bytesIndex++;
+    }
+    for (var i = 0; i < second.length; i++) {
+        bytes[bytesIndex] = second[i];
+        bytesIndex++;
+    }
+    return bytes;
+}
+
 function createBlackBox() {
     var key;
     var iv;
     var availableBlockModes = ['ecb', 'cbc'];
     var blockMode;
+    var prefixLength;
+    var prefix;
+    var suffixLength;
+    var suffix;
 
     key = generateRandomBytes(16);
     iv = generateRandomBytes(16);
     blockMode = availableBlockModes[randomInteger(0, 1)];
+    prefixLength = randomInteger(5, 10);
+    prefix = generateRandomBytes(prefixLength);
+    suffixLength = randomInteger(5, 10);
+    suffix = generateRandomBytes(suffixLength);
 
     return function (input) {
+        input = concatenateBytes(prefix, input);
+        input = concatenateBytes(input, suffix);
         if (blockMode === 'ecb') {
             return encryptAes128Ecb(input, key);
         } else if (blockMode === 'cbc') {
@@ -114,6 +140,9 @@ function decryptAes128Cbc(input, key, iv) {
 }
 
 function encryptAes128Ecb(input, key) {
+    var blockSize = 16;
+    input = addPkcsPadding(input, blockSize);
+
     input = hexEncode(input);
     key = asciiEncode(key);
     var cipher = crypto.createCipheriv('aes-128-ecb', key, '');
