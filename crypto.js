@@ -3,11 +3,66 @@ var crypto = require('crypto');
 
 function decryptEcbByteAtATime(blackBox) {
     var blockSize;
+    var numberOfBlocks;
+    var target = [];
+    var dictionaryGenBase = [];
+    var dictionary;
+    var offsetPrefix;
+    var targetByteValue;
 
     blockSize = findBlockSize(blackBox);
     isEcb = checkIfEcb(blackBox);
     if (!checkIfEcb(blackBox)) {
         console.log('The given black box is not in ecb mode!');
+    }
+
+    // initialize dictionaryGenBase
+    for (var i = 0; i < blockSize - 1; i++) {
+        dictionaryGenBase.push(255);
+    }
+
+    numberOfBlocks = blackBox([]).length / blockSize;
+    for (var i = 0; i < numberOfBlocks; i++) {
+        offsetPrefix = [];
+        for (var j = 0; j < blockSize - 1; j++) {
+            offsetPrefix.push(255);
+        }
+
+        for (var j = 0; j < blockSize; j++) {
+            dictionary = generateDictionary();
+            targetByteValue = computeTargetByteValue();
+            target.push(targetByteValue);
+            dictionaryGenBase = dictionaryGenBase.slice(1);
+            dictionaryGenBase.push(targetByteValue);
+
+            offsetPrefix = offsetPrefix.slice(1);
+        }
+    }
+
+    return target;
+
+    function generateDictionary() {
+        // note: key is value returned by black box, value is input
+        var dictionary = {};
+        var key;
+        var value;
+
+        for (var i = 0; i < 256; i++) {
+            value = i;
+            key = blackBox(dictionaryGenBase.concat([i])).slice(0, blockSize);
+            dictionary[hexEncode(key)] = value;
+        }
+
+        return dictionary;
+    }
+
+    function computeTargetByteValue() {
+        var output;
+
+        output = blackBox(offsetPrefix);
+        output = output.slice(blockSize * i, blockSize * (i + 1));
+        output = hexEncode(output);
+        return dictionary[output];
     }
 
     function findBlockSize(blackBox) {
