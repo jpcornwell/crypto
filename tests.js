@@ -5,6 +5,45 @@ module.exports = {
     createBlackBox: createBlackBox,
 };
 
+function parseKeyValueString(keyValueString) {
+    var obj = {};
+
+    var keyValues = keyValueString.split('&');
+    
+    keyValues.forEach(function (keyValue) {
+        var pair = keyValue.split('=');
+        obj[pair[0]] = pair[1];
+    });
+
+    return obj;
+}
+
+function generateKeyValueString(obj) {
+    var keyValueString = '';
+
+    for (var property in obj) {
+        if (obj.hasOwnProperty(property)) {
+            keyValueString += property + '=';
+            keyValueString += obj[property] + '&';
+        }
+    }
+
+    keyValueString = keyValueString.slice(0, -1);
+    return keyValueString;
+}
+
+function profileFor(email) {
+    email = email.replace('&', '').replace('=', '');
+
+    profile = {
+        email: email,
+        uid: 10,
+        role: 'user',
+    };
+
+    return generateKeyValueString(profile);
+}
+
 function createEcbBlackBox() {
     // this black box contains a target string which is appended to user input
 
