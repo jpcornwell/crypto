@@ -1,9 +1,44 @@
-var crypto = require('crypto');
+var crypto = require('./crypto');
 
 module.exports = {
+    createProfileServerBlackBox: createProfileServerBlackBox,
     createEcbBlackBox: createEcbBlackBox,
     createBlackBox: createBlackBox,
 };
+
+function createProfileServerBlackBox() {
+    var key = crypto.generateRandomBytes(16);
+
+    var provideEncryptedProfile = function (email) {
+        var profile = profileFor(email);
+        profile = crypto.asciiDecode(profile);
+
+        return crypto.encryptAes128Ecb(profile, key);
+    };
+
+    var decryptProfile = function (cipherText) {
+        var profileText = crypto.decryptAes128Ecb(cipherText, key);
+        profileText = crypto.asciiEncode(profileText);
+
+        var profile = parseKeyValueString(profileText);
+
+        return profile;
+    };
+
+    return {
+        provideEncryptedProfile: provideEncryptedProfile,
+        decryptProfile: decryptProfile,
+    };
+}
+
+
+function provideEncryptedUserProfile(email) {
+
+}
+
+function takeEncryptedUserProfile(cipherText) {
+
+}
 
 function parseKeyValueString(keyValueString) {
     var obj = {};

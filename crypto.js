@@ -1,3 +1,4 @@
+var crypto = require('crypto');
 
 module.exports = {
     addPkcsPadding: addPkcsPadding,
@@ -135,7 +136,6 @@ function encryptAes128Ecb(input, key) {
     input = addPkcsPadding(input, blockSize);
 
     input = hexEncode(input);
-    key = asciiEncode(key);
     var cipher = crypto.createCipheriv('aes-128-ecb', key, '');
     cipher.setAutoPadding(false);
     var crypted = cipher.update(input, 'hex', 'hex');
@@ -146,7 +146,6 @@ function encryptAes128Ecb(input, key) {
 
 function decryptAes128Ecb(input, key) {
     input = hexEncode(input);
-    key = asciiEncode(key);
     var decipher = crypto.createDecipheriv('aes-128-ecb', key, '');
     decipher.setAutoPadding(false);
     var dec = decipher.update(input, 'hex', 'hex');
