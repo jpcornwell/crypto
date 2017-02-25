@@ -20,6 +20,7 @@ module.exports = {
     mergeBlocksIntoBytes: mergeBlocksIntoBytes,
     randomInteger: randomInteger,
     splitBytesIntoBlocks: splitBytesIntoBlocks,
+    stripPkcsPadding: stripPkcsPadding,
 }
 
 
@@ -70,6 +71,29 @@ function addPkcsPadding(input, blockSize) {
     }
 
     return output;
+}
+
+function stripPkcsPadding(input, blockSize) {
+    var lastBlock = input.slice(-blockSize);
+
+    // easier to work with the last block from beginning to end
+    lastBlock.reverse();
+
+    var firstByteValue = lastBlock[0];
+    var currentByteValue = firstByteValue;
+    var i = 0;
+
+    while (firstByteValue === lastBlock[i] && i < blockSize) {
+        i++;
+    }
+
+    padding = lastBlock.slice(0, i);
+
+    if (padding.length === firstByteValue) {
+        return input.slice(0, -padding.length);
+    }
+
+    return input;
 }
 
 function splitBytesIntoBlocks(input, blockSize) {
@@ -128,7 +152,9 @@ function decryptAes128Cbc(input, key, iv) {
         }
     }
 
-    return mergeBlocksIntoBytes(blocks, blockSize);
+    var output = mergeBlocksIntoBytes(blocks, blockSize);
+    output = stripPkcsPadding(output, blockSize);
+    return output;
 }
 
 function encryptAes128Ecb(input, key) {
@@ -145,12 +171,14 @@ function encryptAes128Ecb(input, key) {
 }
 
 function decryptAes128Ecb(input, key) {
+    var blockSize = 16;
     input = hexEncode(input);
     var decipher = crypto.createDecipheriv('aes-128-ecb', key, '');
     decipher.setAutoPadding(false);
     var dec = decipher.update(input, 'hex', 'hex');
     dec += decipher.final('hex');
     dec = hexDecode(dec);
+    dec = stripPkcsPadding(dec, blockSize);
     return dec;
 }
 
