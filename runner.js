@@ -8,9 +8,9 @@ main();
 function main() {
     var server = tests.createCbcPaddingBlackBox();
 
-    var a = server.encrypt();
+    var a = server.encrypt().ciphertext;
     console.log(server.decrypt(a));
 
-    var b = server.encrypt();
+    var b = server.encrypt().ciphertext;
     console.log(server.decrypt(b));
 }

@@ -28,7 +28,10 @@ function createCbcPaddingBlackBox() {
         var input = options[crypto.randomInteger(1, options.length) - 1];
 
         input = crypto.base64Decode(input);
-        return crypto.encryptAes128Cbc(input, key, iv);
+        return {
+            ciphertext: crypto.encryptAes128Cbc(input, key, iv),
+            iv: iv,
+        };
     };
 
     var decrypt = function (input) {
