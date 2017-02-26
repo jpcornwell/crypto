@@ -5,6 +5,7 @@ module.exports = {
     createEcbBlackBox: createEcbBlackBox,
     createBlackBox: createBlackBox,
     createCbcBlackBox: createCbcBlackBox,
+    createCbcPaddingBlackBox: createCbcPaddingBlackBox,
 };
 
 function createCbcPaddingBlackBox() {
@@ -24,8 +25,7 @@ function createCbcPaddingBlackBox() {
             'MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=',
             'MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93',
         ];
-        var input = options[crypto.generateRandomInteger(1, 
-                options.length) - 1];
+        var input = options[crypto.randomInteger(1, options.length) - 1];
 
         input = crypto.base64Decode(input);
         return crypto.encryptAes128Cbc(input, key, iv);
@@ -34,6 +34,11 @@ function createCbcPaddingBlackBox() {
     var decrypt = function (input) {
         try {
             var content = crypto.decryptAes128Cbc(input, key, iv);
+        }
+        catch (error) {
+            if (error.message.contains('padding')) {
+                return false;
+            }
         }
 
         return true;
