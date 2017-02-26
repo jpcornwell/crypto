@@ -4,7 +4,36 @@ module.exports = {
     createProfileServerBlackBox: createProfileServerBlackBox,
     createEcbBlackBox: createEcbBlackBox,
     createBlackBox: createBlackBox,
+    createCbcBlackBox: createCbcBlackBox,
 };
+
+function createCbcBlackBox() {
+    var key = crypto.generateRandomBytes(16);
+    var iv = crypto.generateRandomBytes(16);
+
+    var encrypt = function (input) {
+        input = input.replace('=', '').replace(';', '');        
+
+        var pre = 'comment1=cooking%20MCs;userdata=';
+        var post = ';comment2=%20like%20a%20pound%20of%20bacon';
+        input = pre + input + post;
+
+        input = crypto.asciiDecode(input);
+        return crypto.encryptAes128Cbc(input, key, iv);
+    };
+
+    var decrypt = function (input) {
+        var profile = crypto.decryptAes128Cbc(input, key, iv);
+
+        profile = crypto.asciiEncode(profile);
+        return profile.includes('admin=true');
+    };
+
+    return {
+        encrypt: encrypt,
+        decrypt: decrypt,
+    };
+}
 
 function createProfileServerBlackBox() {
     var key = crypto.generateRandomBytes(16);
@@ -31,14 +60,6 @@ function createProfileServerBlackBox() {
     };
 }
 
-
-function provideEncryptedUserProfile(email) {
-
-}
-
-function takeEncryptedUserProfile(cipherText) {
-
-}
 
 function parseKeyValueString(keyValueString) {
     var obj = {};
