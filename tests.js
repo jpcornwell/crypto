@@ -7,6 +7,44 @@ module.exports = {
     createCbcBlackBox: createCbcBlackBox,
 };
 
+function createCbcPaddingBlackBox() {
+    var key = crypto.generateRandomBytes(16);
+    var iv = crypto.generateRandomBytes(16);
+
+    var encrypt = function () {
+        var options = [
+            'MDAwMDAwTm93IHRoYXQgdGhlIHBhcnR5IGlzIGp1bXBpbmc=',
+            'MDAwMDAxV2l0aCB0aGUgYmFzcyBraWNrZWQgaW4gYW5kIHRoZSBWZWdhJ3MgYXJlIHB1bXBpbic=',
+            'MDAwMDAyUXVpY2sgdG8gdGhlIHBvaW50LCB0byB0aGUgcG9pbnQsIG5vIGZha2luZw==',
+            'MDAwMDAzQ29va2luZyBNQydzIGxpa2UgYSBwb3VuZCBvZiBiYWNvbg==',
+            'MDAwMDA0QnVybmluZyAnZW0sIGlmIHlvdSBhaW4ndCBxdWljayBhbmQgbmltYmxl',
+            'MDAwMDA1SSBnbyBjcmF6eSB3aGVuIEkgaGVhciBhIGN5bWJhbA==',
+            'MDAwMDA2QW5kIGEgaGlnaCBoYXQgd2l0aCBhIHNvdXBlZCB1cCB0ZW1wbw==',
+            'MDAwMDA3SSdtIG9uIGEgcm9sbCwgaXQncyB0aW1lIHRvIGdvIHNvbG8=',
+            'MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=',
+            'MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93',
+        ];
+        var input = options[crypto.generateRandomInteger(1, 
+                options.length) - 1];
+
+        input = crypto.base64Decode(input);
+        return crypto.encryptAes128Cbc(input, key, iv);
+    };
+
+    var decrypt = function (input) {
+        try {
+            var content = crypto.decryptAes128Cbc(input, key, iv);
+        }
+
+        return true;
+    };
+
+    return {
+        encrypt: encrypt,
+        decrypt: decrypt,
+    };
+}
+
 function createCbcBlackBox() {
     var key = crypto.generateRandomBytes(16);
     var iv = crypto.generateRandomBytes(16);

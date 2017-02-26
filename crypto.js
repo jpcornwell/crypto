@@ -74,7 +74,7 @@ function stripPkcsPadding(input, blockSize) {
     var lastByteValue = lastBlock.slice(-1)[0];
 
     if (lastByteValue > blockSize) {
-        throw 'Invalid padding';
+        throw new Error('Invalid padding');
     }
 
     var padding = lastBlock.slice(-lastByteValue);
@@ -82,7 +82,7 @@ function stripPkcsPadding(input, blockSize) {
     // make sure all bytes in padding have correct padding value
     for (var i = 0; i < padding.length; i++) {
         if (padding[i] !== lastByteValue) {
-            throw 'Invalid padding';
+            throw new Error('Invalid padding');
         }
     }
 
@@ -91,7 +91,7 @@ function stripPkcsPadding(input, blockSize) {
 
 function splitBytesIntoBlocks(input, blockSize) {
     if (input.length % blockSize !== 0) {
-        throw new "Number of bytes of input is not a multiple of block size";
+        throw new Error("Number of bytes of input is not a multiple of block size");
     }
 
     var outputBlocks = [];
@@ -103,7 +103,7 @@ function splitBytesIntoBlocks(input, blockSize) {
 
 function mergeBlocksIntoBytes(input, blockSize) {
     if (input[input.length - 1].length !== blockSize) {
-        throw new "Number of bytes of input is not a multiple of block size";
+        throw new Error("Number of bytes of input is not a multiple of block size");
     }
 
     var output = new Uint8Array(input.length * blockSize);
@@ -204,7 +204,7 @@ function findHammingDistance(a, b) {
 
 function fixedXor(a, b) {
     if (a.length !== b.length) {
-        throw 'inputs are not equal length';
+        throw new Error('inputs are not equal length');
     }
 
     var output = new Uint8Array(a.length);
@@ -218,7 +218,7 @@ function fixedXor(a, b) {
 
 function hexDecode(hex) {
     if (hex.length % 2 === 1) {
-        throw 'hex string is not even length';
+        throw new Error('hex string is not even length');
     }
 
     var bytes = new Uint8Array(hex.length / 2);
