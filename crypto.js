@@ -57,10 +57,6 @@ function generateRandomBytes(size) {
 function addPkcsPadding(input, blockSize) {
     var bytesExtra = input.length % blockSize;
 
-    if (bytesExtra === 0) {
-        return input;
-    }
-
     var bytesNeeded = blockSize - bytesExtra;
     var output = new Uint8Array(input.length + bytesNeeded);
     for (var i = 0; i < input.length; i++) {
@@ -75,25 +71,22 @@ function addPkcsPadding(input, blockSize) {
 
 function stripPkcsPadding(input, blockSize) {
     var lastBlock = input.slice(-blockSize);
+    var lastByteValue = lastBlock.slice(-1)[0];
 
-    // easier to work with the last block from beginning to end
-    lastBlock.reverse();
-
-    var firstByteValue = lastBlock[0];
-    var currentByteValue = firstByteValue;
-    var i = 0;
-
-    while (firstByteValue === lastBlock[i] && i < blockSize) {
-        i++;
+    if (lastByteValue > blockSize) {
+        throw 'Invalid padding';
     }
 
-    padding = lastBlock.slice(0, i);
+    var padding = lastBlock.slice(-lastByteValue);
 
-    if (padding.length === firstByteValue) {
-        return input.slice(0, -padding.length);
+    // make sure all bytes in padding have correct padding value
+    for (var i = 0; i < padding.length; i++) {
+        if (padding[i] !== lastByteValue) {
+            throw 'Invalid padding';
+        }
     }
 
-    return input;
+    return input.slice(0, -padding.length);
 }
 
 function splitBytesIntoBlocks(input, blockSize) {
