@@ -39,7 +39,7 @@ function createCbcPaddingBlackBox() {
             var content = crypto.decryptAes128Cbc(input, key, iv);
         }
         catch (error) {
-            if (error.message.contains('padding')) {
+            if (error.message.includes('padding')) {
                 return false;
             }
         }

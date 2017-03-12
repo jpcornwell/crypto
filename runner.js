@@ -8,9 +8,10 @@ main();
 function main() {
     var server = tests.createCbcPaddingBlackBox();
 
-    var a = server.encrypt().ciphertext;
-    console.log(server.decrypt(a));
-
-    var b = server.encrypt().ciphertext;
-    console.log(server.decrypt(b));
+    var temp = server.encrypt();
+    var a = temp.ciphertext;
+    var iv = temp.iv;
+    console.log(crypto.hexEncode(a));
+    var a = crack.crackCbcPadding(server.decrypt, a, iv);
+    console.log(a);
 }

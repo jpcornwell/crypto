@@ -1,10 +1,66 @@
-var crypto = require('crypto');
+var crypto = require('./crypto');
 
 module.exports = {
     crackEcbByteAtATime: crackEcbByteAtATime,
     crackRepeatingKeyXor: crackRepeatingKeyXor,
     crackSingleByteXor: crackSingleByteXor,
     scoreEnglishText: scoreEnglishText,
+    crackCbcPadding: crackCbcPadding,
+}
+
+function crackCbcPadding(blackBox, inputCiphertext, iv) {
+    var ciphertext = new Uint8Array(inputCiphertext.length + iv.length);
+    ciphertext.set(iv);
+    ciphertext.set(inputCiphertext, iv.length);
+
+    var blockSize = 16;
+    var numBlocks = ciphertext.length / blockSize;
+    var plaintext = '';
+    var currentPlain;
+    
+    for (var curBlock = 1; curBlock < numBlocks; curBlock++) {
+        var plainBlock = crackBlock(curBlock);
+        plaintext = plaintext + plainBlock;
+    }
+
+    return plaintext;
+
+    function crackBlock(blockNum) {
+        var prevBlockNum = blockNum - 1;
+        var origCipher = new Uint8Array(blockSize * 2); // two original blocks
+        var cipherCopy = new Uint8Array(blockSize * 2);
+        var pt = new Uint8Array(blockSize); // plaintext block
+
+        origCipher.set(ciphertext.slice(prevBlockNum * blockSize, 
+                    (prevBlockNum * blockSize) + blockSize));
+        origCipher.set(ciphertext.slice(blockNum * blockSize, 
+                    (blockNum * blockSize) + blockSize), blockSize);
+
+        // solve each byte of the block starting at the end
+        for (var i = blockSize - 1; i >=0; i--) {
+            cipherCopy.set(origCipher);
+
+            // break original padding if it exists
+            cipherCopy[i - 1] = 255;
+
+            // add end padding
+            for (var j = blockSize - 1; j > i; j--) {
+                cipherCopy[j] = origCipher[j] ^ pt[j] ^ (blockSize - i);
+            }
+
+            // loop through potential values
+            for (var guess = 0; guess < 256; guess++) {
+                cipherCopy[i] = origCipher[i] ^ guess ^ (blockSize - i);
+                if (blackBox(cipherCopy)) {
+                    break;
+                }
+            }
+
+            pt[i] = guess;
+        }
+
+        return crypto.asciiEncode(pt);
+    }
 }
 
 function crackEcbByteAtATime(blackBox) {
