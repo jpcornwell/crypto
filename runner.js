@@ -6,12 +6,14 @@ var tests = require('./tests');
 main();
 
 function main() {
-    var server = tests.createCbcPaddingBlackBox();
 
-    var temp = server.encrypt();
-    var a = temp.ciphertext;
-    var iv = temp.iv;
-    console.log(crypto.hexEncode(a));
-    var a = crack.crackCbcPadding(server.decrypt, a, iv);
-    console.log(a);
+    var input = 'L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==';
+    input = crypto.base64Decode(input);
+    var key = 'YELLOW SUBMARINE';
+    key = crypto.asciiDecode(key);
+    var nonce = 0;
+    var output = crypto.applyCtrCipher(input, key, nonce);
+
+    output = crypto.asciiEncode(output);
+    console.log(output);
 }

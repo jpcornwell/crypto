@@ -2,6 +2,7 @@ var crypto = require('crypto');
 
 module.exports = {
     addPkcsPadding: addPkcsPadding,
+    applyCtrCipher: applyCtrCipher,
     applyRepeatingKeyXor: applyRepeatingKeyXor,
     asciiDecode: asciiDecode,
     asciiEncode: asciiEncode,
@@ -179,6 +180,52 @@ function decryptAes128Ecb(input, key, disablePadding) {
     }
 
     return dec;
+}
+
+function applyCtrCipher(input, key, nonce) {
+    var blockSize = 16;
+    var blocks = [];
+
+    for (var i = 0; i < input.length; i += blockSize) {
+        blocks.push(input.slice(i, i + blockSize));
+    }
+
+    var keystream = generateKeystream(blocks.length, key, nonce);
+
+    var output = new Uint8Array(input.length);
+
+    for (var i = 0; i < output.length; i++) {
+        output[i] = input[i] ^ keystream[i];
+    }
+
+    return output;
+
+    function generateKeystream(blocks, key, nonce) {
+        var keystream = [];
+        var temp;
+        var nonceHex;
+        var counterHex;
+
+        nonceHex = hexEncode(nonce);
+        while (nonceHex.length < 16) {
+            nonceHex = '0' + nonceHex;
+        }
+        nonceHex = nonceHex.match(/[a-fA-F0-9]{2}/g).reverse().join('');
+
+        for (var i = 0; i < blocks; i++) {
+            counterHex = i.toString(16);
+            while (counterHex.length < 16) {
+                counterHex = '0' + counterHex;
+            }
+            counterHex = counterHex.match(/[a-fA-F0-9]{2}/g).reverse().join('');
+
+            temp = hexDecode(nonceHex + counterHex);
+
+            keystream = keystream.concat(Array.from(
+                        encryptAes128Ecb(temp, key, true)));
+        }
+        return keystream;
+    }
 }
 
 function applyRepeatingKeyXor(input, key) {
