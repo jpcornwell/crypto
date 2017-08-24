@@ -39,6 +39,9 @@ def crack_single_byte_xor(input):
     for key in range(256):
         candidate = xor_bytes(input, bytes([key]))
         score = score_english_text(candidate.decode('ascii', 'replace'))
-        candidates.append((candidate, score))
+        candidates.append({
+            'plain_text': candidate, 
+            'score': score, 
+            'key': key})
 
-    return min(candidates, key=lambda x: x[1])
+    return min(candidates, key=lambda x: x['score'])
