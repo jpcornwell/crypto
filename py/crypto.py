@@ -1,6 +1,11 @@
 from collections import Counter
 from itertools import cycle
 
+def hamming_distance(a, b):
+    assert len(a) == len(b)
+    xor_result = xor_bytes(a, b)
+    return sum([bin(byte_val).count('1') for byte_val in xor_result])
+
 def xor_bytes(a, b):
     return bytes([i ^ j for (i, j) in zip(a, cycle(b))])
 
