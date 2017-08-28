@@ -50,3 +50,28 @@ def crack_single_byte_xor(input):
             'key': key})
 
     return min(candidates, key=lambda x: x['score'])
+
+def crack_repeating_key_xor(input):
+    # guess the keysize (assuming length is between 1 and 40 inclusive)
+    candidates = []
+    for i in range(1, 40):
+        dist = hamming_distance(input[:i], input[i:2*i]) / i
+        candidates.append((i, dist))
+    keysize = min(candidates, key=lambda x: x[1])[0]
+
+    transpose = []
+    for i in range(keysize):
+        transpose.append(bytes(
+            [input[j] for j in range(i, len(input), keysize)]))
+
+    key = []
+    for i in range(len(transpose)):
+        key.append(crack_single_byte_xor(transpose[i])['key'])
+    key = bytes(key)
+
+    plain_text = xor_bytes(input, key)
+
+    return {
+        'plain_text': plain_text,
+        'key': key}
+
